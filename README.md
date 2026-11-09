@@ -5,6 +5,8 @@ No server, no Wi-Fi, no accounts: each device keeps its own data and devices sha
 **QR code**. It installs to the home screen of iPads, Android tablets and phones and runs
 with no network.
 
+**Open the app:** https://gearsincorg.github.io/ftc-scout/
+
 Why QR codes: Competition Manual rule **E301** bans teams from running their own Wi-Fi
 (including phone hotspots) and **Bluetooth** at the venue.
 
@@ -57,9 +59,10 @@ python -m http.server 8080
 ```
 
 Open http://localhost:8080. The camera works on `localhost`. On other devices the camera
-and offline install need **HTTPS**, so for tablets host it on HTTPS. The easiest option is
-GitHub Pages: push this folder to a GitHub repo, then go to Settings → Pages → deploy from
-the `main` branch root. The app uses relative paths, so it works under `/<repo>/`.
+and offline install need **HTTPS**, so tablets use the hosted copy at
+**https://gearsincorg.github.io/ftc-scout/**. It's served by GitHub Pages from this repo:
+Settings → Pages → Deploy from a branch → `master`, `/ (root)`. Pushing to `master`
+updates the site within a minute or two. The app uses relative paths, so it works under `/ftc-scout/`.
 
 ### Installing on devices (do this on Wi-Fi before the event)
 
