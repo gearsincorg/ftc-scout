@@ -23,6 +23,12 @@ Why QR codes: Competition Manual rule **E301** bans teams from running their own
   - **Schedule**: load the schedule, then show it as a QR code for scouts to scan.
   - **Data**: JSON backup, CSV for spreadsheets, and merging backups from other devices.
 
+- **Hub + Scout** (the hub device, when its operator also scouts a slot): pick this on the
+  home screen. **Hub ▶** in the scout toolbar and **Scout ▶** in the hub header switch screens
+  with one tap. Matches you save go straight into the hub's data with no QR step, and the
+  scout side uses the hub's schedule directly. Scout during the match, then switch to Hub
+  between matches to scan the other scouts.
+
 Scouts that fall behind can open **Saved → Show all as one code** to send everything at once.
 Large data is split into several codes that cycle automatically (`Part 1 of 3`); keep the
 hub camera pointed until all parts are in.

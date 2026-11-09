@@ -8,9 +8,12 @@ import { config, fields, recordId, packData, estimate } from './records.js';
 import { resetDevice } from './reset.js';
 
 let root, st, dev, sched, cur, dirty = false;
+let dual = false; // Hub + Scout device: records are already in the hub database
 
 export async function mountScout(el) {
   root = el;
+  dirty = false;
+  dual = !!(await db.getKV('dual'));
   dev = await db.deviceId();
   st = (await db.getKV('scout')) || { name: '', slot: null, lvl: 'Q', idx: 0, ev: '', manualNum: 1 };
   sched = { Q: await db.getKV('sched:Q'), P: await db.getKV('sched:P') };
@@ -95,9 +98,11 @@ function render() {
       onchange: e => { st.manualNum = Math.max(1, parseInt(e.target.value, 10) || 1); save(); loadMatch(); } })) : null,
     h('label', { class: 'inline' }, 'Team ', teamIn, over),
     h('span', { class: 'grow' }),
-    h('button', { class: 'btn small', onclick: openSchedule }, 'Schedule'),
+    // On a Hub + Scout device the schedule comes from the hub itself.
+    dual ? null : h('button', { class: 'btn small', onclick: openSchedule }, 'Schedule'),
     h('button', { class: 'btn small', onclick: openSaved }, 'Saved'),
-    h('button', { class: 'btn small', onclick: openSettings }, '⚙'));
+    h('button', { class: 'btn small', onclick: openSettings }, '⚙'),
+    dual ? h('button', { class: 'btn small primary', onclick: goHub }, 'Hub ▶') : null);
 
   const est = h('div', { class: 'est' });
   const updEst = () => { est.textContent = `Est. ${estimate(cur.d).total} pts`; };
@@ -157,7 +162,28 @@ async function doSave() {
   };
   await db.putRecord(rec);
   cur.rec = rec; dirty = false;
-  showRecordQR([rec], `${m.label} · Team ${rec.t}`, !m.last);
+  if (dual) savedToHub(rec, m);
+  else showRecordQR([rec], `${m.label} · Team ${rec.t}`, !m.last);
+}
+
+function goHub() {
+  if (dirty && !confirm('This match has unsaved changes. Leave without saving?')) return;
+  dirty = false;
+  location.hash = '#hub';
+}
+
+// Hub + Scout: no QR needed, the record is already in this device's hub data.
+function savedToHub(rec, m) {
+  const close = modal(`${m.label} · Team ${rec.t}`, h('div', {},
+    h('p', { class: 'center big-ok' }, '✓ Saved to the hub'),
+    h('p', { class: 'muted center' }, `Est. ${estimate(rec.d).total} pts. Edit it any time from Saved or with ◀.`)),
+  {
+    onClose: () => render(),
+    actions: [
+      h('button', { class: 'btn big', onclick: () => { close(); goHub(); } }, 'Go to Hub'),
+      m.last ? null : h('button', { class: 'btn primary big grow', onclick: () => { close(); step(1); } }, 'Next match ▶'),
+    ],
+  });
 }
 
 function showRecordQR(recs, title, offerNext = false) {
@@ -201,23 +227,29 @@ function openSchedule() {
     ? h('div', {}, h('b', {}, l === 'Q' ? 'Quals' : 'Playoffs'), ` ${sched[l].ev} · version ${sched[l].v} · ${sched[l].matches.length} matches`)
     : h('div', { class: 'muted' }, (l === 'Q' ? 'Quals' : 'Playoffs') + ': not loaded'));
   const infoBox = h('div', { class: 'card' }, info());
+  // A complete schedule read ends the scan: camera off, popup closes, and the
+  // toast says what happened. Wrong codes leave it open to try again.
+  const finish = (msg, kind = 'ok') => {
+    panel.stop();
+    toast(msg, kind);
+    setTimeout(close, 700); // long enough to see the ✓ in the popup
+    return msg;
+  };
   const panel = scanPanel(async (kind, data) => {
-    if (kind !== 'S') return 'That is a record code, not a schedule';
+    if (kind !== 'S') throw new Error('That is a record code, not a schedule. Scan the hub’s schedule code.');
     const s = expand(JSON.parse(data));
     const old = sched[s.lvl];
     const what = s.lvl === 'Q' ? 'quals' : 'playoffs';
-    if (old && old.ev === s.ev && old.v >= s.v) return `Already have ${s.ev} ${what} version ${old.v}, nothing new`;
+    if (old && old.ev === s.ev && old.v >= s.v) return finish(`Already have ${s.ev} ${what} version ${old.v}, nothing new`, '');
     if (old && old.ev !== s.ev) { // new event: drop the other level too
       for (const l of ['Q', 'P']) { sched[l] = null; await db.delKV('sched:' + l); }
     }
     sched[s.lvl] = s;
     await db.setKV('sched:' + s.lvl, s);
-    const msg = `Loaded ${s.ev} ${what} version ${s.v}: ${s.matches.length} matches`;
-    toast(msg, 'ok');
     clear(infoBox).append(...info());
-    return msg;
+    return finish(`Loaded ${s.ev} ${what} version ${s.v}: ${s.matches.length} matches`);
   });
-  modal('Schedule', h('div', {}, infoBox, h('p', { class: 'muted' }, 'Scan the schedule QR on the hub. Rescan whenever the hub reissues it.'), panel),
+  const close = modal('Schedule', h('div', {}, infoBox, h('p', { class: 'muted' }, 'Scan the schedule QR on the hub. Rescan whenever the hub reissues it.'), panel),
     { onClose: () => { panel.stop(); loadMatch(); } });
 }
 

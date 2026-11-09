@@ -17,14 +17,21 @@ export async function mountHub(el) {
   await reload();
   meta = (await db.getKV('hub')) || { season: config.season, code: '' };
   tab = (await db.getKV('hubTab')) || 'scan';
+  const dual = await db.getKV('dual');
   body = h('div', { class: 'page' });
   const nav = h('nav', { class: 'tabs' }, TABS.map(([id, label]) =>
     h('button', { class: 'tab' + (tab === id ? ' on' : ''), 'data-tab': id, onclick: () => show(id) }, label)));
   clear(root).append(h('header', { class: 'hub-head' },
     h('div', { class: 'big-title' }, 'Hub'),
     h('div', { class: 'sub', id: 'hub-sub' }),
+    dual ? h('button', { class: 'btn small switch', onclick: () => (location.hash = '#scout') }, 'Scout ▶') : null,
     h('button', { class: 'btn small ghost', onclick: () => (location.hash = '#home') }, 'Home')), nav, body);
   show(tab);
+}
+
+// Called when leaving the hub screen: make sure the camera is off.
+export function unmountHub() {
+  if (activePanel) { activePanel.stop(); activePanel = null; }
 }
 
 async function reload() {
@@ -53,7 +60,7 @@ function scan() {
   const drawLog = () => clear(log).append(...scanLog.slice(0, 30).map(l => h('div', { class: 'list-row ' + l.cls }, l.text)));
   activePanel = scanPanel(async (kind, data) => {
     let obj;
-    try { obj = JSON.parse(data); } catch (e) { return 'Bad QR data'; }
+    try { obj = JSON.parse(data); } catch (e) { throw new Error('Could not read that code’s data'); }
     if (kind === 'S') { const s = await saveSchedule(expand(obj)); return `Schedule ${s.ev} version ${s.v}`; }
     const list = Array.isArray(obj) ? obj : [obj];
     const counts = { new: 0, updated: 0, same: 0 };

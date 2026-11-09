@@ -1,6 +1,6 @@
 // Offline cache for the app shell. Bump VERSION whenever any file below changes,
 // so installed devices pick up the update (they get it on the next online launch).
-const VERSION = 'ftc-scout-v6';
+const VERSION = 'ftc-scout-v12';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/ui.js', 'js/db.js', 'js/qr.js', 'js/schedule.js', 'js/records.js',
@@ -10,7 +10,11 @@ const FILES = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: 'reload' skips the browser's HTTP cache, so an update never installs
+  // a stale mix of old and new files.
+  e.waitUntil(caches.open(VERSION)
+    .then(c => c.addAll(FILES.map(f => new Request(f, { cache: 'reload' }))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {

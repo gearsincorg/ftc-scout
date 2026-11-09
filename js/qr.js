@@ -240,32 +240,72 @@ export class Scanner {
 
 // A ready-made scan panel: video, start/stop, photo fallback, paste fallback.
 // onMessage(kind, data) receives complete messages.
-export function scanPanel(onMessage) {
+// Options:
+//   autoStart  start the camera as soon as the panel is shown (default true)
+//   idleMs     turn the camera off after this long with no code read (default 60 s)
+// The camera also stops when the panel leaves the page, and pauses while the
+// app is in the background (resuming when it comes back).
+export function scanPanel(onMessage, { autoStart = true, idleMs = 60000 } = {}) {
   const status = h('div', { class: 'scan-status' }, 'Camera off');
   const asm = new Assembler((kind, data) => {
     status.textContent = '✓ Received';
-    // Handlers may return (a promise of) a short result line to show here.
-    Promise.resolve(onMessage(kind, data)).then(m => { if (m) status.textContent = '✓ ' + m; });
+    // Handlers may return (a promise of) a short result line to show here,
+    // or throw to report a problem.
+    Promise.resolve().then(() => onMessage(kind, data))
+      .then(m => { if (m) status.textContent = '✓ ' + m; }, e => { status.textContent = '✗ ' + e.message; });
   }, (have, n, got) => {
     status.textContent = `Got ${got.map(g => (g ? '■' : '□')).join('')}  part ${have} of ${n}, keep pointing at the code`;
   });
   const video = h('video', { class: 'scan-video', playsinline: true, muted: true });
   const view = h('div', { class: 'scan-view' }, video, h('div', { class: 'scan-aim' }));
-  const feed = t => { if (!asm.push(t)) status.textContent = 'Not an FTC Scout code'; };
+  let lastRead = Date.now();
+  const feed = t => {
+    lastRead = Date.now(); // any readable code counts as activity
+    if (!asm.push(t)) status.textContent = 'Not an FTC Scout code';
+  };
   const scanner = new Scanner(video, feed);
-  const btn = h('button', { class: 'btn primary big', onclick: async () => {
-    if (scanner.running) { scanner.stop(); btn.textContent = 'Start camera'; status.textContent = 'Camera off'; return; }
+  let beat = null, starting = false, pausedForBackground = false;
+
+  const stopCam = msg => {
+    clearInterval(beat); beat = null;
+    scanner.stop();
+    btn.textContent = 'Start camera';
+    if (msg) status.textContent = msg;
+  };
+  const startCam = async () => {
+    if (scanner.running || starting) return;
+    starting = true;
     try {
       await scanner.start();
+      if (!panel.isConnected) { scanner.stop(); return; } // closed while the camera was starting
       btn.textContent = 'Stop camera';
       status.textContent = 'Fill the square with the QR code';
+      lastRead = Date.now();
       const t0 = Date.now(), f0 = scanner.frames;
-      const beat = setInterval(() => {
-        if (!scanner.running) { clearInterval(beat); return; }
+      beat = setInterval(() => {
+        if (!panel.isConnected) { stopCam(); return; }            // panel closed or screen changed
+        if (Date.now() - lastRead > idleMs) {
+          stopCam(`Camera paused after ${Math.round(idleMs / 1000)} s with no code. Tap Start camera to resume.`);
+          return;
+        }
         if (/^(Fill|Looking)/.test(status.textContent))
           status.textContent = `Looking… ${Math.round((scanner.frames - f0) / ((Date.now() - t0) / 1000))} frames/s · fill the square with the code`;
       }, 1000);
-    } catch (e) { status.textContent = 'Camera error: ' + e.message; }
+    } catch (e) {
+      status.textContent = 'Camera error: ' + e.message + (autoStart ? ' · tap Start camera to try again' : '');
+    } finally { starting = false; }
+  };
+
+  const onVisibility = () => {
+    if (!panel.isConnected) { document.removeEventListener('visibilitychange', onVisibility); return; }
+    if (document.hidden && scanner.running) { pausedForBackground = true; stopCam('Camera paused'); }
+    else if (!document.hidden && pausedForBackground) { pausedForBackground = false; startCam(); }
+  };
+  document.addEventListener('visibilitychange', onVisibility);
+
+  const btn = h('button', { class: 'btn primary big', onclick: () => {
+    pausedForBackground = false;
+    if (scanner.running) stopCam('Camera off'); else startCam();
   } }, 'Start camera');
   const photo = h('button', { class: 'btn', onclick: async () => {
     const f = await pickFile('image/*');
@@ -285,7 +325,9 @@ export function scanPanel(onMessage) {
     if (t) t.split(/\r?\n/).map(s => s.trim()).filter(Boolean).forEach(feed);
   } }, 'Paste text');
   const panel = h('div', { class: 'scan-panel' }, view, status, h('div', { class: 'row wrap' }, btn, photo, paste, snap));
-  panel.stop = () => scanner.stop();
+  panel.stop = () => { pausedForBackground = false; stopCam(); };
   panel.feed = feed;
+  // Start once the caller has put the panel on the page.
+  if (autoStart) setTimeout(() => { if (panel.isConnected && !document.hidden) startCam(); }, 0);
   return panel;
 }
