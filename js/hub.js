@@ -1,6 +1,6 @@
 // Hub mode: scan and merge scout records, keep the schedule, summarize teams.
 
-import { h, clear, toast, modal, download, pickFile, fmtTime } from './ui.js';
+import { h, clear, toast, modal, download, pickFile, fmtTime, homeButton } from './ui.js';
 import * as db from './db.js';
 import { asciiJSON, makeFrames, showFrames, scanPanel, qrSize } from './qr.js';
 import { SLOTS, SLOT_NAMES, compact, expand, sameMatches, parseTyped, toTyped, fetchFTCScout, fromFtcEventsJson } from './schedule.js';
@@ -25,7 +25,7 @@ export async function mountHub(el) {
     h('div', { class: 'big-title' }, 'Hub'),
     h('div', { class: 'sub', id: 'hub-sub' }),
     dual ? h('button', { class: 'btn small switch', onclick: () => (location.hash = '#scout') }, 'Scout ▶') : null,
-    h('button', { class: 'btn small ghost', onclick: () => (location.hash = '#home') }, 'Home')), nav, body);
+    homeButton()), nav, body);
   show(tab);
 }
 

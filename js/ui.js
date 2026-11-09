@@ -17,6 +17,12 @@ export function h(tag, attrs = {}, ...kids) {
   return el;
 }
 
+// The Home button every screen shows. canLeave() may return false to stay put.
+export function homeButton(canLeave = () => true) {
+  return h('button', { class: 'btn small ghost', 'aria-label': 'Home',
+    onclick: () => { if (canLeave()) location.hash = '#home'; } }, '⌂ Home');
+}
+
 export function clear(el) { while (el.firstChild) el.firstChild.remove(); return el; }
 
 let toastTimer;

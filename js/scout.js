@@ -1,6 +1,6 @@
 // Scout mode: one device, one schedule slot. Fill the form, save, show the QR.
 
-import { h, clear, toast, modal, download, fmtTime } from './ui.js';
+import { h, clear, toast, modal, download, fmtTime, homeButton } from './ui.js';
 import * as db from './db.js';
 import { asciiJSON, makeFrames, showFrames, scanPanel, qrSize } from './qr.js';
 import { SLOTS, SLOT_NAMES, expand } from './schedule.js';
@@ -62,7 +62,7 @@ function renderSetup() {
     save(); loadMatch();
   };
   clear(root).append(h('div', { class: 'page' },
-    h('h1', {}, 'Scout setup'),
+    h('div', { class: 'row' }, h('h1', { class: 'grow' }, 'Scout setup'), homeButton()),
     h('label', { class: 'lbl' }, 'Scout name', name),
     h('label', { class: 'lbl' }, 'Event', ev),
     h('p', { class: 'muted' }, 'Pick your schedule slot. Red 1 means the first red team listed for each match, not a spot on the field. Find your robot by its team number.'),
@@ -102,7 +102,8 @@ function render() {
     dual ? null : h('button', { class: 'btn small', onclick: openSchedule }, 'Schedule'),
     h('button', { class: 'btn small', onclick: openSaved }, 'Saved'),
     h('button', { class: 'btn small', onclick: openSettings }, '⚙'),
-    dual ? h('button', { class: 'btn small primary', onclick: goHub }, 'Hub ▶') : null);
+    dual ? h('button', { class: 'btn small primary', onclick: goHub }, 'Hub ▶') : null,
+    homeButton(okToLeave));
 
   const est = h('div', { class: 'est' });
   const updEst = () => { est.textContent = `Est. ${estimate(cur.d).total} pts`; };
@@ -166,10 +167,14 @@ async function doSave() {
   else showRecordQR([rec], `${m.label} · Team ${rec.t}`, !m.last);
 }
 
-function goHub() {
-  if (dirty && !confirm('This match has unsaved changes. Leave without saving?')) return;
+function okToLeave() {
+  if (dirty && !confirm('This match has unsaved changes. Leave without saving?')) return false;
   dirty = false;
-  location.hash = '#hub';
+  return true;
+}
+
+function goHub() {
+  if (okToLeave()) location.hash = '#hub';
 }
 
 // Hub + Scout: no QR needed, the record is already in this device's hub data.
@@ -265,7 +270,6 @@ function openSettings() {
         download(`scout-${dev}-${new Date().toISOString().slice(0, 10)}.json`,
           JSON.stringify({ app: 'g-scout', kind: 'backup', records: (await db.allRecords()).filter(r => r.dev === dev) }));
       } }, 'Download backup'),
-      h('button', { class: 'btn', onclick: () => { location.hash = '#home'; } }, 'Switch to hub / home'),
       h('button', { class: 'btn danger', onclick: () => { close(); resetDevice(); } }, 'Reset this device'))),
   { onClose: () => { st.name = name.value.trim(); save(); } });
 }

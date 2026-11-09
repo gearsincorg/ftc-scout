@@ -11,6 +11,7 @@ import { mountHub, unmountHub } from './hub.js';
 import { config } from './records.js';
 
 const app = document.getElementById('app');
+let firstRoute = true;
 
 async function choose(role) {
   await db.setKV('dual', role === 'dual');
@@ -21,7 +22,14 @@ async function route() {
   unmountHub(); // stop the hub camera if we're leaving the hub
   document.querySelectorAll('.modal').forEach(m => m.remove());
   let mode = location.hash.slice(1);
-  if (!mode) mode = (await db.getKV('mode')) || 'home';
+  if (!mode) {
+    // Only a fresh launch reopens the remembered mode. Going Back to the bare
+    // address means "home". replaceState records the mode without adding a
+    // history entry, so Back from it leaves the app as usual.
+    mode = firstRoute ? ((await db.getKV('mode')) || 'home') : 'home';
+    if (mode !== 'home') history.replaceState(null, '', '#' + mode);
+  }
+  firstRoute = false;
   if (mode === 'scout') { await db.setKV('mode', 'scout'); return mountScout(app); }
   if (mode === 'hub') { await db.setKV('mode', 'hub'); return mountHub(app); }
   await db.setKV('mode', 'home');
