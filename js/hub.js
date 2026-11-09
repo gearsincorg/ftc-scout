@@ -263,9 +263,9 @@ function data() {
       h('div', { class: 'muted' }, 'Storage protected from eviction: ', persisted),
       h('p', { class: 'muted small' }, 'iPads can clear web-app data after a while without use. Download a backup after each session and keep it on another device.')),
     h('div', { class: 'row wrap' },
-      h('button', { class: 'btn primary', onclick: () => download(`ftc-scout-backup-${stamp()}.json`,
-        JSON.stringify({ app: 'ftc-scout', kind: 'backup', exported: Date.now(), config: config.id, sched, teams, records })) }, 'Download backup (JSON)'),
-      h('button', { class: 'btn', onclick: () => download(`ftc-scout-${stamp()}.csv`, '﻿' + toCSV(records), 'text/csv') }, 'Download CSV'),
+      h('button', { class: 'btn primary', onclick: () => download(`g-scout-backup-${stamp()}.json`,
+        JSON.stringify({ app: 'g-scout', kind: 'backup', exported: Date.now(), config: config.id, sched, teams, records })) }, 'Download backup (JSON)'),
+      h('button', { class: 'btn', onclick: () => download(`g-scout-${stamp()}.csv`, '﻿' + toCSV(records), 'text/csv') }, 'Download CSV'),
       h('button', { class: 'btn', onclick: async () => {
         const f = await pickFile('.json,application/json');
         if (!f) return;

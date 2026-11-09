@@ -261,7 +261,7 @@ export function scanPanel(onMessage, { autoStart = true, idleMs = 60000 } = {}) 
   let lastRead = Date.now();
   const feed = t => {
     lastRead = Date.now(); // any readable code counts as activity
-    if (!asm.push(t)) status.textContent = 'Not an FTC Scout code';
+    if (!asm.push(t)) status.textContent = 'Not a G-SCOUT code';
   };
   const scanner = new Scanner(video, feed);
   let beat = null, starting = false, pausedForBackground = false;

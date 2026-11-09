@@ -1,11 +1,11 @@
-# FTC Scout
+# G-SCOUT
 
 Offline match-scouting web app for FIRST Tech Challenge, set up for **BIOBUZZ (2026-2027)**.
 No server, no Wi-Fi, no accounts: each device keeps its own data and devices share it by
 **QR code**. It installs to the home screen of iPads, Android tablets and phones and runs
 with no network.
 
-**Open the app:** https://gearsincorg.github.io/ftc-scout/
+**Open the app:** https://gearsincorg.github.io/g-scout/
 
 Why QR codes: Competition Manual rule **E301** bans teams from running their own Wi-Fi
 (including phone hotspots) and **Bluetooth** at the venue.
@@ -54,15 +54,15 @@ hub camera pointed until all parts are in.
 It's plain HTML/JS with no build step.
 
 ```bash
-cd D:\Users\Phil\GitHub\FTC-Scout
+cd D:\Users\Phil\GitHub\G-SCOUT
 python -m http.server 8080
 ```
 
 Open http://localhost:8080. The camera works on `localhost`. On other devices the camera
 and offline install need **HTTPS**, so tablets use the hosted copy at
-**https://gearsincorg.github.io/ftc-scout/**. It's served by GitHub Pages from this repo:
+**https://gearsincorg.github.io/g-scout/**. It's served by GitHub Pages from this repo:
 Settings → Pages → Deploy from a branch → `master`, `/ (root)`. Pushing to `master`
-updates the site within a minute or two. The app uses relative paths, so it works under `/ftc-scout/`.
+updates the site within a minute or two. The app uses relative paths, so it works under `/g-scout/`.
 
 ### Installing on devices (do this on Wi-Fi before the event)
 

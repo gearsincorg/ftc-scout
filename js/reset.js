@@ -15,8 +15,8 @@ export async function resetDevice() {
     n ? h('p', {}, h('b', {}, 'Download a backup first'), ' unless you are sure the hub already has them.') : null),
   {
     actions: [
-      h('button', { class: 'btn', onclick: () => download(`ftc-scout-device-backup-${stamp}.json`,
-        JSON.stringify({ app: 'ftc-scout', kind: 'backup', exported: Date.now(), records: data.records, kv: data.kv })) }, 'Download backup'),
+      h('button', { class: 'btn', onclick: () => download(`g-scout-device-backup-${stamp}.json`,
+        JSON.stringify({ app: 'g-scout', kind: 'backup', exported: Date.now(), records: data.records, kv: data.kv })) }, 'Download backup'),
       h('span', { class: 'grow' }),
       h('button', { class: 'btn danger', onclick: async () => {
         if (!confirm(`Erase ${n} record${n === 1 ? '' : 's'} and all settings on this device? This cannot be undone.`)) return;

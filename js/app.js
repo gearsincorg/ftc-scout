@@ -26,7 +26,7 @@ async function route() {
   if (mode === 'hub') { await db.setKV('mode', 'hub'); return mountHub(app); }
   await db.setKV('mode', 'home');
   clear(app).append(h('div', { class: 'page home' },
-    h('h1', {}, 'FTC Scout'),
+    h('h1', {}, 'G-SCOUT'),
     h('p', { class: 'muted' }, `${config.game} · works offline · data moves by QR code`),
     h('div', { class: 'home-grid' },
       h('button', { class: 'btn big home-btn', onclick: () => choose('scout') }, h('b', {}, 'Scout'), h('small', {}, 'Watch one robot per match and fill in the form')),

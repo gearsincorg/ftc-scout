@@ -263,7 +263,7 @@ function openSettings() {
       h('button', { class: 'btn', onclick: () => { st.slot = null; save(); close(); renderSetup(); } }, 'Change slot / event'),
       h('button', { class: 'btn', onclick: async () => {
         download(`scout-${dev}-${new Date().toISOString().slice(0, 10)}.json`,
-          JSON.stringify({ app: 'ftc-scout', kind: 'backup', records: (await db.allRecords()).filter(r => r.dev === dev) }));
+          JSON.stringify({ app: 'g-scout', kind: 'backup', records: (await db.allRecords()).filter(r => r.dev === dev) }));
       } }, 'Download backup'),
       h('button', { class: 'btn', onclick: () => { location.hash = '#home'; } }, 'Switch to hub / home'),
       h('button', { class: 'btn danger', onclick: () => { close(); resetDevice(); } }, 'Reset this device'))),

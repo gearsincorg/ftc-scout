@@ -4,7 +4,7 @@ let dbp;
 function open() {
   if (!dbp) {
     dbp = new Promise((resolve, reject) => {
-      const req = indexedDB.open('ftc-scout', 1);
+      const req = indexedDB.open('g-scout', 1);
       req.onupgradeneeded = () => {
         const db = req.result;
         db.createObjectStore('records', { keyPath: 'id' });
@@ -35,7 +35,7 @@ export async function dumpAll() {
 export async function eraseAll() {
   if (dbp) { (await dbp).close(); dbp = null; }
   return new Promise((resolve, reject) => {
-    const req = indexedDB.deleteDatabase('ftc-scout');
+    const req = indexedDB.deleteDatabase('g-scout');
     req.onsuccess = () => resolve(true);
     req.onerror = () => reject(req.error);
     req.onblocked = () => resolve(false); // another tab still has it open; finishes when that tab closes

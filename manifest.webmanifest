@@ -1,6 +1,6 @@
 {
-  "name": "FTC Scout",
-  "short_name": "FTC Scout",
+  "name": "G-SCOUT",
+  "short_name": "G-SCOUT",
   "description": "Offline FTC match scouting with QR-code sync",
   "start_url": "./index.html",
   "scope": "./",
