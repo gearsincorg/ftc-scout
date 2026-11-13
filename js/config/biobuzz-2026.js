@@ -9,7 +9,7 @@
 //   choice   one of `options`     (stored as 1..n, 0 = not set; no default)
 //   rating   1..max               (0 = not rated)
 //   text     free notes
-// A section with `tint` (auto | teleop | end) is drawn as a coloured region, its title in the
+// A section with `tint` (auto | teleop | end | perf) is drawn as a coloured region, its title in the
 // region's border colour. Without it, the section is a plain card with its title.
 // `pair: true` puts a toggle on the same row as the toggle before it (the row's toggles share it equally).
 
@@ -47,7 +47,7 @@ export default {
       ],
     },
     {
-      id: 'other', title: 'PERFORMANCE', sub: '',
+      id: 'other', title: 'PERFORMANCE', tint: 'perf',
       fields: [
         { id: 'pc', type: 'choice', label: 'Pollen Collecting', options: ['Slow', 'Avg.', 'Fast'] },
         { id: 'nc', type: 'choice', label: 'Nectar Collecting', options: ['Slow', 'Avg.', 'Fast'] },
@@ -64,7 +64,7 @@ export default {
   // Team summary columns: the scouted counts themselves, no points. `fn(d)` gets one
   // record's field values and returns a number, true/false, or null (= skip this match).
   // agg: avg (per match) | pct (share of matches where true) | sum (matches where true) | max.
-  // `group` is a section id (auto | teleop | end) or 'perf': columns are grouped and
+  // `group` is a section tint (auto | teleop | end | perf): columns are grouped and
   // coloured like the form's regions. A `key` line explains a column in the footnote.
   // `label` heads the table columns; the team sheet's tiles use `full` when given.
   // `one(d)`, if given, is what the team sheet's match-by-match table shows instead of fn(d).

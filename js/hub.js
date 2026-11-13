@@ -182,7 +182,7 @@ function teamSheet(r) {
         config.metrics.map(m => h('td', { class: firstOfGroup(m) ? 'gs' : null }, m.one ? m.one(x.d || {}) : oneValue(m.fn(x.d || {}))))))))),
     h('p', { class: 'muted small' }, metricKey().replace('Per-match averages unless marked %', 'Top: per-match averages unless marked %; table: ✓ = yes')),
     h('h3', {}, 'Notes'),
-    h('div', { class: 'list' }, r.records.filter(x => x.d.nt).map(x => h('div', { class: 'list-row' }, h('b', {}, x.m + ' '), x.d.nt)))), { wide: true });
+    h('div', { class: 'list notes-list' }, r.records.filter(x => x.d.nt).map(x => h('div', { class: 'list-row' }, h('b', {}, x.m + ' '), x.d.nt)))), { wide: true });
 }
 
 // ---- schedule -------------------------------------------------------------------

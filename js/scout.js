@@ -111,7 +111,7 @@ function render() {
   const changed = () => { dirty = true; };
 
   const form = h('div', { class: 'form' }, config.sections.map(sec =>
-    // Tinted sections (AUTO, TELEOP, ENDGAME) have no header: the colour tells them apart.
+    // Tinted sections (AUTO, TELEOP, ENDGAME, PERFORMANCE) have no header: the colour tells them apart.
     h('section', { class: 'card' + (sec.tint ? ` tint tint-${sec.tint}` : ''), 'aria-label': sec.title },
       h('h2', {}, sec.title, sec.sub ? h('span', { class: 'muted' }, ' ', sec.sub) : null),
       pairRows(sec.fields.map(f => [f, fieldEl(f, cur.d, changed)])))));
