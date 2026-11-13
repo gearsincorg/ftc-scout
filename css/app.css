@@ -161,6 +161,7 @@ th, td { padding: 8px; border-bottom: 1px solid var(--line); text-align: center;
 /* Summary tables grouped like the form: tinted group headers, a divider before each group,
    and the Team / Match column stays put while the rest scrolls sideways. */
 .rank.grouped th, .rank.grouped td { padding: 6px 5px; }
+.rank.grouped { width: auto; }   /* Teams and match tables: only as wide as their columns need */
 .rank.grouped .grp th { font-size: .7rem; letter-spacing: .04em; padding: 3px 5px; border-bottom: 0; }
 .rank .g-auto { background: var(--auto-bg); color: var(--auto-line); }
 .rank .g-teleop { background: var(--tele-bg); color: var(--tele-line); }
