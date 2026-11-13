@@ -83,7 +83,7 @@ export function toCSV(records) {
   const rows = records.slice().sort((a, b) => matchOrder(a.m) - matchOrder(b.m)).map(r => {
     const d = r.d || {}, e = estimate(d);
     return [r.ev, r.m, r.s, r.t, r.sc, new Date(r.u).toISOString(),
-      ...fields.map(f => f.type === 'choice' ? (f.options[d[f.id] || 0]) : (d[f.id] ?? 0)),
+      ...fields.map(f => f.type === 'choice' ? (f.options[d[f.id] - 1] ?? '') : (d[f.id] ?? 0)),
       ...config.metrics.map(m => { const v = m.fn(d, e); return typeof v === 'boolean' ? +v : v; })].map(esc).join(',');
   });
   return [cols.join(','), ...rows].join('\n');

@@ -75,8 +75,14 @@ Then test with Wi-Fi off. Everything except the FTCScout download works offline.
 
 ### Updating the app
 
-Bump `VERSION` in `sw.js` whenever you change any file. Installed devices pick up the update
-the next time they open the app online. Reopen it a second time to load the new version.
+Bump `VERSION` in `sw.js` whenever you change any file. Installed devices fetch the update the
+next time they open the app online, and the app reloads itself once to show it (a quick flash).
+It waits instead if a scout has unsaved match changes, a dialog is open or the camera is
+scanning; then a message says the update loads next time the app opens. (Devices still on
+v16 or older need one extra reopen to get this behaviour.)
+
+On your own machine (`localhost`), Ctrl+Shift+R also skips the offline cache, or tick
+DevTools → Application → Service workers → **Update on reload** while editing.
 
 ### Backups (important on iPads)
 
@@ -109,7 +115,7 @@ RP thresholds for regular events: SWARM ≥ 16 LEAVE+PARK points, POLLINATOR 1 �
 POLLINATOR 2 ≥ 7 TIPS.
 
 "Est pts" is a per-robot estimate. Tips are credited to the robot whose launch completed
-them, FLOWER points assume the alliance owned that FLOWER, and the CELL-contents and
+them, FLOWER points assume the alliance owned that FLOWER, and GARDEN points, the CELL-contents and
 bottom-NECTAR bonuses (alliance end state) aren't scouted.
 
 ## Schedule data sources (findings, Nov 2026)

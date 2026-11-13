@@ -4,9 +4,9 @@
 // operator also scouts one slot: its scout records go straight into the hub
 // database, and a button in each screen switches to the other.
 
-import { h, clear } from './ui.js';
+import { h, clear, toast } from './ui.js';
 import * as db from './db.js';
-import { mountScout } from './scout.js';
+import { mountScout, hasUnsavedChanges } from './scout.js';
 import { mountHub, unmountHub } from './hub.js';
 import { config } from './records.js';
 
@@ -49,5 +49,18 @@ route();
 db.persist();
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  // An update installs in the background while the old version is on screen. When it takes
+  // over, reload once so it shows now rather than on the next launch, unless that would lose
+  // work: unsaved match changes, an open dialog, or the camera scanning (multi-part codes).
+  const hadController = !!navigator.serviceWorker.controller;   // none on the very first install
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloading) return;
+    const busy = hasUnsavedChanges() || document.querySelector('.modal')
+      || [...document.querySelectorAll('video')].some(v => v.srcObject);
+    if (busy) { toast('App updated. The new version loads next time it opens.'); return; }
+    reloading = true;
+    location.reload();
+  });
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('Service worker failed', e));
 }

@@ -8,6 +8,9 @@ import { config, fields, recordId, packData, estimate } from './records.js';
 import { resetDevice } from './reset.js';
 
 let root, st, dev, sched, cur, dirty = false;
+
+// For app.js: don't reload for an app update while a match has unsaved changes.
+export const hasUnsavedChanges = () => dirty;
 let dual = false; // Hub + Scout device: records are already in the hub database
 
 export async function mountScout(el) {
@@ -111,13 +114,26 @@ function render() {
   updEst();
 
   const form = h('div', { class: 'form' }, config.sections.map(sec =>
-    h('section', { class: 'card' },
+    // Tinted sections (AUTO, TELEOP, ENDGAME) have no header: the colour tells them apart.
+    h('section', { class: 'card' + (sec.tint ? ` tint tint-${sec.tint}` : ''), 'aria-label': sec.title },
       h('h2', {}, sec.title, sec.sub ? h('span', { class: 'muted' }, ' ', sec.sub) : null),
-      sec.fields.map(f => fieldEl(f, cur.d, changed)))));
+      pairRows(sec.fields.map(f => [f, fieldEl(f, cur.d, changed)])))));
 
   const saveBtn = h('button', { class: 'btn primary big wide', onclick: doSave }, cur.rec ? 'Save changes & show QR' : 'Save & show QR');
   clear(root).append(head, h('div', { class: 'page' }, tools, form, h('div', { class: 'save-bar' }, est, saveBtn)));
   window.scrollTo(0, 0);
+}
+
+// A field marked `pair` joins the row of the field before it: its contents move into that
+// row, and the two share the width.
+function pairRows(items) {
+  const out = [];
+  for (const [f, el] of items) {
+    const prev = out[out.length - 1];
+    if (f.pair && prev) { prev.classList.add('pair'); prev.append(...el.childNodes); }
+    else out.push(el);
+  }
+  return out;
 }
 
 function fieldEl(f, d, changed) {
@@ -137,12 +153,12 @@ function fieldEl(f, d, changed) {
   }
   if (f.type === 'choice' || f.type === 'rating') {
     const opts = f.type === 'choice' ? f.options : Array.from({ length: f.max }, (_, i) => String(i + 1));
-    const base = f.type === 'choice' ? 0 : 1;
-    const btns = opts.map((o, i) => h('button', { class: 'btn' + ((d[f.id] || 0) === i + base && (f.type === 'choice' || d[f.id]) ? ' on' : ''),
+    // Stored as 1..n with 0 = not set, so nothing is picked until the scout taps one.
+    const btns = opts.map((o, i) => h('button', { class: 'btn' + (d[f.id] === i + 1 ? ' on' : ''),
       onclick: () => {
-        const v = i + base;
-        d[f.id] = f.type === 'rating' && d[f.id] === v ? 0 : v; // tap again to clear a rating
-        btns.forEach((b, j) => b.classList.toggle('on', d[f.id] === j + base));
+        const v = i + 1;
+        d[f.id] = d[f.id] === v ? 0 : v; // tap again to clear
+        btns.forEach((b, j) => b.classList.toggle('on', d[f.id] === j + 1));
         changed();
       } }, o));
     return h('div', { class: 'field' }, lab, h('div', { class: 'seg fill' }, btns));

@@ -123,7 +123,7 @@ function recordSheet(rs) {
       h('tr', {}, h('th', {}, f.label), h('td', {}, fieldText(f, r.d[f.id])))))))));
 }
 
-const fieldText = (f, v) => f.type === 'choice' ? f.options[v || 0] : f.type === 'toggle' ? (v ? 'yes' : 'no') : (v ?? '');
+const fieldText = (f, v) => f.type === 'choice' ? (f.options[v - 1] ?? '') : f.type === 'toggle' ? (v ? 'yes' : 'no') : (v ?? '');
 
 // ---- teams / rankings ---------------------------------------------------------
 function teamsTab() {
@@ -148,7 +148,7 @@ function teamsTab() {
   };
   body.append(h('input', { type: 'search', class: 'search', placeholder: 'Search team number, name or notes', value: search,
     oninput: e => { search = e.target.value; draw(); } }), out,
-    h('p', { class: 'muted small' }, `Est pts = this robot's LEAVE, PARK, TIPS, GARDEN and FLOWER points (${config.manual}). Tips are credited to the robot whose launch completed them; FLOWER points assume the alliance owned it. Tap a column to sort, a row for details.`));
+    h('p', { class: 'muted small' }, `Est pts = this robot's LEAVE, PARK, TIPS and FLOWER points (${config.manual}). Tips are credited to the robot whose launch completed them; FLOWER points assume the alliance owned it. Tap a column to sort, a row for details.`));
   draw();
 }
 
@@ -159,7 +159,7 @@ function teamSheet(r) {
     h('div', { class: 'scroll-x' }, h('table', { class: 'rank small' },
       h('thead', {}, h('tr', {}, h('th', {}, 'Match'), h('th', {}, 'Pts'), shown.map(f => h('th', { title: f.label }, f.id)))),
       h('tbody', {}, r.records.map(x => h('tr', {}, h('td', {}, x.m), h('td', {}, estimate(x.d).total),
-        shown.map(f => h('td', {}, f.type === 'toggle' ? (x.d[f.id] ? '✓' : '') : f.type === 'choice' ? f.options[x.d[f.id] || 0][0] : (x.d[f.id] || '')))))))),
+        shown.map(f => h('td', {}, f.type === 'toggle' ? (x.d[f.id] ? '✓' : '') : f.type === 'choice' ? (f.options[x.d[f.id] - 1] ?? '').charAt(0) : (x.d[f.id] || '')))))))),
     h('p', { class: 'muted small' }, shown.map(f => `${f.id} = ${f.label}`).join(' · ')),
     h('h3', {}, 'Notes'),
     h('div', { class: 'list' }, r.records.filter(x => x.d.nt).map(x => h('div', { class: 'list-row' }, h('b', {}, x.m + ' '), x.d.nt)))));
