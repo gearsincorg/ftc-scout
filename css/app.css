@@ -32,6 +32,7 @@ h3 { font-size: 1.05rem; margin: 1.2em 0 .5em; }
 .grow { flex: 1; }
 .mono { font-family: ui-monospace, Consolas, monospace; }
 .page { max-width: 900px; margin: 0 auto; padding: 12px 16px 120px; }
+.page.wide { max-width: 1400px; }
 .row { display: flex; gap: 8px; align-items: center; }
 .row.wrap { flex-wrap: wrap; }
 .row.center { justify-content: center; margin-top: 8px; }

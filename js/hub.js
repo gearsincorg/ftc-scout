@@ -50,6 +50,7 @@ function show(id) {
   tab = id; db.setKV('hubTab', id);
   root.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === id));
   clear(body);
+  body.classList.toggle('wide', id === 'teams');   // the Teams table may use a big screen's full width
   subtitle();
   ({ scan, cover, teams: teamsTab, sched: schedTab, data })[id]();
 }
@@ -174,7 +175,7 @@ function teamSheet(r) {
   modal(`Team ${r.team}${teams[r.team] ? ' · ' + teams[r.team] : ''} · ${r.n} match${r.n === 1 ? '' : 'es'}`, h('div', {},
     groupRuns().map(g => h('div', { class: `stat-group g-${g.g}` }, h('div', { class: 'stat-title' }, config.groups[g.g] || ''),
       h('div', { class: 'stats' }, config.metrics.filter(m => m.group === g.g).map(m =>
-        h('div', { class: 'stat' }, h('div', { class: 'stat-v' }, fmtMetric(m, r.m[m.id])), h('div', { class: 'muted' }, m.label)))))),
+        h('div', { class: 'stat' }, h('div', { class: 'stat-v' }, fmtMetric(m, r.m[m.id])), h('div', { class: 'muted' }, m.full || m.label)))))),
     h('div', { class: 'scroll-x' }, h('table', { class: 'rank small grouped' },
       h('thead', {}, groupRow(1), h('tr', {}, h('th', { class: 'stick' }, 'Match'), config.metrics.map(m => h('th', { class: gClass(m) }, m.label)))),
       h('tbody', {}, r.records.map(x => h('tr', {}, h('td', { class: 'stick' }, x.m),
