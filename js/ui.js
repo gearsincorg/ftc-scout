@@ -36,11 +36,11 @@ export function toast(msg, kind = '') {
 }
 
 // Full-screen sheet. Returns a close() function.
-export function modal(title, body, { onClose, actions = [] } = {}) {
+export function modal(title, body, { onClose, actions = [], wide = false } = {}) {
   let closed = false;
   const close = () => { if (closed) return; closed = true; wrap.remove(); onClose && onClose(); };
   const wrap = h('div', { class: 'modal', onclick: e => e.target === wrap && close() },
-    h('div', { class: 'sheet' },
+    h('div', { class: 'sheet' + (wide ? ' wide' : '') },   // wide: up to 1280 px on big screens
       h('div', { class: 'sheet-head' },
         h('h2', {}, title),
         h('button', { class: 'btn ghost', onclick: close, 'aria-label': 'Close' }, '✕')),

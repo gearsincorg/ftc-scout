@@ -4,7 +4,7 @@ import { h, clear, toast, modal, download, pickFile, fmtTime, homeButton } from 
 import * as db from './db.js';
 import { asciiJSON, makeFrames, showFrames, scanPanel, qrSize } from './qr.js';
 import { SLOTS, SLOT_NAMES, compact, expand, sameMatches, parseTyped, toTyped, fetchFTCScout, fromFtcEventsJson } from './schedule.js';
-import { config, fields, summarize, fmtMetric, matchOrder, toCSV, estimate } from './records.js';
+import { config, fields, summarize, fmtMetric, matchOrder, toCSV } from './records.js';
 import { resetDevice } from './reset.js';
 
 let root, body, tab, records = [], sched = {}, teams = {}, meta, scanLog = [], activePanel;
@@ -118,7 +118,7 @@ function cover() {
 
 function recordSheet(rs) {
   modal(`${rs[0].m} · ${SLOT_NAMES[rs[0].s]}`, h('div', {}, rs.map(r => h('div', { class: 'card' },
-    h('b', {}, `Team ${r.t}`), h('div', { class: 'muted' }, `${r.sc || '?'} · device ${r.dev} · ${fmtTime(r.u)} · est ${estimate(r.d).total} pts`),
+    h('b', {}, `Team ${r.t}`), h('div', { class: 'muted' }, `${r.sc || '?'} · device ${r.dev} · ${fmtTime(r.u)}`),
     h('table', { class: 'kv' }, fields.filter(f => r.d[f.id] !== undefined).map(f =>
       h('tr', {}, h('th', {}, f.label), h('td', {}, fieldText(f, r.d[f.id])))))))));
 }
@@ -126,6 +126,21 @@ function recordSheet(rs) {
 const fieldText = (f, v) => f.type === 'choice' ? (f.options[v - 1] ?? '') : f.type === 'toggle' ? (v ? 'yes' : 'no') : (v ?? '');
 
 // ---- teams / rankings ---------------------------------------------------------
+// Metric columns come in runs of the same `group` (AUTO, TELEOP, ...); the table gets a
+// coloured header row naming each run, and a divider before each run's first column.
+const groupRuns = () => config.metrics.reduce((runs, m) => {
+  const last = runs[runs.length - 1];
+  if (last && last.g === m.group) last.n++; else runs.push({ g: m.group, n: 1 });
+  return runs;
+}, []);
+const firstOfGroup = m => config.metrics.find(x => x.group === m.group) === m;
+const gClass = (m, extra = '') => `g-${m.group}${firstOfGroup(m) ? ' gs' : ''}${extra}`;
+const groupRow = lead => h('tr', { class: 'grp' }, h('th', { class: 'stick' }), lead > 1 ? h('th', { colspan: lead - 1 }) : null,
+  groupRuns().map(r => h('th', { colspan: r.n, class: `g-${r.g} gs` }, config.groups[r.g] || '')));
+const metricKey = () => ['Per-match averages unless marked %', ...config.metrics.filter(m => m.key).map(m => m.key)].join(' · ');
+// One match's value in a metric column: true = ✓, false/null = blank.
+const oneValue = v => v === true ? '✓' : v === false || v == null ? '' : v;
+
 function teamsTab() {
   const out = h('div', {});
   const draw = () => {
@@ -135,34 +150,38 @@ function teamsTab() {
       r.records.some(x => (x.d.nt || '').toLowerCase().includes(q)));
     const val = r => (sortBy === 'team' ? r.team : sortBy === 'n' ? r.n : r.m[sortBy] ?? -Infinity);
     rows.sort((a, b) => (val(a) > val(b) ? 1 : val(a) < val(b) ? -1 : 0) * sortDir);
-    const th = (id, label) => h('th', { class: 'sort' + (sortBy === id ? ' on' : ''), onclick: () => {
+    const th = (id, label, cls = '') => h('th', { class: `sort ${cls}` + (sortBy === id ? ' on' : ''), onclick: () => {
       sortDir = sortBy === id ? -sortDir : -1; sortBy = id; draw();
     } }, label, sortBy === id ? (sortDir < 0 ? ' ▼' : ' ▲') : '');
-    clear(out).append(rows.length ? h('div', { class: 'scroll-x' }, h('table', { class: 'rank' },
-      h('thead', {}, h('tr', {}, h('th', {}, '#'), th('team', 'Team'), th('n', 'Mt'), config.metrics.map(m => th(m.id, m.label)))),
-      h('tbody', {}, rows.map((r, i) => h('tr', { onclick: () => teamSheet(r) },
-        h('td', { class: 'muted' }, i + 1),
-        h('td', {}, h('b', {}, r.team), teams[r.team] ? h('div', { class: 'tname' }, teams[r.team]) : null),
-        h('td', {}, r.n), config.metrics.map(m => h('td', {}, fmtMetric(m, r.m[m.id])))))))) :
+    const x = out.querySelector('.scroll-x')?.scrollLeft || 0;   // keep the sideways scroll across a re-sort
+    clear(out).append(rows.length ? h('div', { class: 'scroll-x' }, h('table', { class: 'rank grouped' },
+      h('thead', {}, groupRow(2),
+        h('tr', {}, th('team', 'Team', 'stick'), th('n', 'Mt'), config.metrics.map(m => th(m.id, m.label, gClass(m))))),
+      h('tbody', {}, rows.map(r => h('tr', { onclick: () => teamSheet(r) },
+        h('td', { class: 'stick' }, h('b', {}, r.team), teams[r.team] ? h('div', { class: 'tname' }, teams[r.team]) : null),
+        h('td', {}, r.n), config.metrics.map(m => h('td', { class: firstOfGroup(m) ? 'gs' : null }, fmtMetric(m, r.m[m.id])))))))) :
       h('p', { class: 'muted' }, records.length ? 'No match for that search.' : 'No records yet. Scan some on the Scan tab.'));
+    const sx = out.querySelector('.scroll-x'); if (sx) sx.scrollLeft = x;
   };
   body.append(h('input', { type: 'search', class: 'search', placeholder: 'Search team number, name or notes', value: search,
     oninput: e => { search = e.target.value; draw(); } }), out,
-    h('p', { class: 'muted small' }, `Est pts = this robot's LEAVE, PARK, TIPS and FLOWER points (${config.manual}). Tips are credited to the robot whose launch completed them; FLOWER points assume the alliance owned it. Tap a column to sort, a row for details.`));
+    h('p', { class: 'muted small' }, `${metricKey()}. Tap a column to sort, a team for its matches.`));
   draw();
 }
 
 function teamSheet(r) {
-  const shown = fields.filter(f => f.type !== 'text');
-  modal(`Team ${r.team}${teams[r.team] ? ' · ' + teams[r.team] : ''}`, h('div', {},
-    h('div', { class: 'stats' }, config.metrics.map(m => h('div', { class: 'stat' }, h('div', { class: 'stat-v' }, fmtMetric(m, r.m[m.id])), h('div', { class: 'muted' }, m.label)))),
-    h('div', { class: 'scroll-x' }, h('table', { class: 'rank small' },
-      h('thead', {}, h('tr', {}, h('th', {}, 'Match'), h('th', {}, 'Pts'), shown.map(f => h('th', { title: f.label }, f.id)))),
-      h('tbody', {}, r.records.map(x => h('tr', {}, h('td', {}, x.m), h('td', {}, estimate(x.d).total),
-        shown.map(f => h('td', {}, f.type === 'toggle' ? (x.d[f.id] ? '✓' : '') : f.type === 'choice' ? (f.options[x.d[f.id] - 1] ?? '').charAt(0) : (x.d[f.id] || '')))))))),
-    h('p', { class: 'muted small' }, shown.map(f => `${f.id} = ${f.label}`).join(' · ')),
+  // Averages as tiles, one coloured block per group, then the same columns match by match.
+  modal(`Team ${r.team}${teams[r.team] ? ' · ' + teams[r.team] : ''} · ${r.n} match${r.n === 1 ? '' : 'es'}`, h('div', {},
+    groupRuns().map(g => h('div', { class: `stat-group g-${g.g}` }, h('div', { class: 'stat-title' }, config.groups[g.g] || ''),
+      h('div', { class: 'stats' }, config.metrics.filter(m => m.group === g.g).map(m =>
+        h('div', { class: 'stat' }, h('div', { class: 'stat-v' }, fmtMetric(m, r.m[m.id])), h('div', { class: 'muted' }, m.label)))))),
+    h('div', { class: 'scroll-x' }, h('table', { class: 'rank small grouped' },
+      h('thead', {}, groupRow(1), h('tr', {}, h('th', { class: 'stick' }, 'Match'), config.metrics.map(m => h('th', { class: gClass(m) }, m.label)))),
+      h('tbody', {}, r.records.map(x => h('tr', {}, h('td', { class: 'stick' }, x.m),
+        config.metrics.map(m => h('td', { class: firstOfGroup(m) ? 'gs' : null }, m.one ? m.one(x.d || {}) : oneValue(m.fn(x.d || {}))))))))),
+    h('p', { class: 'muted small' }, metricKey().replace('Per-match averages unless marked %', 'Top: per-match averages unless marked %; table: ✓ = yes')),
     h('h3', {}, 'Notes'),
-    h('div', { class: 'list' }, r.records.filter(x => x.d.nt).map(x => h('div', { class: 'list-row' }, h('b', {}, x.m + ' '), x.d.nt)))));
+    h('div', { class: 'list' }, r.records.filter(x => x.d.nt).map(x => h('div', { class: 'list-row' }, h('b', {}, x.m + ' '), x.d.nt)))), { wide: true });
 }
 
 // ---- schedule -------------------------------------------------------------------

@@ -93,12 +93,14 @@ safe. Scouts can also download their own backup from ⚙.
 
 ## Changing the game
 
-The form, point estimates and summary columns come from
+The form and summary columns come from
 [`js/config/biobuzz-2026.js`](js/config/biobuzz-2026.js). Next season, copy it, edit the
 fields, and change the import in `js/records.js`. Field ids go into every QR code, so keep
 them short. Also add the new file to the list in `sw.js`.
 
-The BIOBUZZ fields follow Competition Manual TU08, Table 10-2:
+The app records what each robot did (counts, yes/no, ratings) and the team summary
+averages those; it doesn't convert them to points. For reference, BIOBUZZ scoring
+(Competition Manual TU08, Table 10-2):
 
 | Achievement | AUTO | TELEOP |
 |---|---|---|
@@ -114,9 +116,6 @@ The BIOBUZZ fields follow Competition Manual TU08, Table 10-2:
 RP thresholds for regular events: SWARM ≥ 16 LEAVE+PARK points, POLLINATOR 1 ≥ 4 TIPS,
 POLLINATOR 2 ≥ 7 TIPS.
 
-"Est pts" is a per-robot estimate. Tips are credited to the robot whose launch completed
-them, FLOWER points assume the alliance owned that FLOWER, and GARDEN points, the CELL-contents and
-bottom-NECTAR bonuses (alliance end state) aren't scouted.
 
 ## Schedule data sources (findings, Nov 2026)
 
@@ -159,7 +158,7 @@ index.html, css/app.css     page shell and styles
 js/app.js                   home screen, routing, service worker registration
 js/scout.js, js/hub.js      the two modes
 js/schedule.js              schedule parsing, compact QR format, FTCScout / FTC API import
-js/records.js               record format, point estimates, team summaries, CSV
+js/records.js               record format, team summaries, CSV
 js/qr.js                    QR drawing, camera scanning, multi-part codes
 js/db.js                    IndexedDB storage
 js/config/biobuzz-2026.js   this season's form

@@ -4,7 +4,7 @@ import { h, clear, toast, modal, download, fmtTime, homeButton } from './ui.js';
 import * as db from './db.js';
 import { asciiJSON, makeFrames, showFrames, scanPanel, qrSize } from './qr.js';
 import { SLOTS, SLOT_NAMES, expand } from './schedule.js';
-import { config, fields, recordId, packData, estimate } from './records.js';
+import { config, fields, recordId, packData } from './records.js';
 import { resetDevice } from './reset.js';
 
 let root, st, dev, sched, cur, dirty = false;
@@ -108,10 +108,7 @@ function render() {
     dual ? h('button', { class: 'btn small primary', onclick: goHub }, 'Hub ▶') : null,
     homeButton(okToLeave));
 
-  const est = h('div', { class: 'est' });
-  const updEst = () => { est.textContent = `Est. ${estimate(cur.d).total} pts`; };
-  const changed = () => { dirty = true; updEst(); };
-  updEst();
+  const changed = () => { dirty = true; };
 
   const form = h('div', { class: 'form' }, config.sections.map(sec =>
     // Tinted sections (AUTO, TELEOP, ENDGAME) have no header: the colour tells them apart.
@@ -120,7 +117,7 @@ function render() {
       pairRows(sec.fields.map(f => [f, fieldEl(f, cur.d, changed)])))));
 
   const saveBtn = h('button', { class: 'btn primary big wide', onclick: doSave }, cur.rec ? 'Save changes & show QR' : 'Save & show QR');
-  clear(root).append(head, h('div', { class: 'page' }, tools, form, h('div', { class: 'save-bar' }, est, saveBtn)));
+  clear(root).append(head, h('div', { class: 'page' }, tools, form, h('div', { class: 'save-bar' }, saveBtn)));
   window.scrollTo(0, 0);
 }
 
@@ -197,7 +194,7 @@ function goHub() {
 function savedToHub(rec, m) {
   const close = modal(`${m.label} · Team ${rec.t}`, h('div', {},
     h('p', { class: 'center big-ok' }, '✓ Saved to the hub'),
-    h('p', { class: 'muted center' }, `Est. ${estimate(rec.d).total} pts. Edit it any time from Saved or with ◀.`)),
+    h('p', { class: 'muted center' }, 'Edit it any time from Saved or with ◀.')),
   {
     onClose: () => render(),
     actions: [

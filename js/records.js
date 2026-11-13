@@ -1,4 +1,4 @@
-// Scouting records: shape, point estimates, team summaries, CSV.
+// Scouting records: shape, team summaries, CSV.
 //
 // Record: { id, ev, m: 'Q12', s: 'B1', t: 14523, sc: 'scout name', dev, u: editedMs,
 //           c: config id, d: { fieldId: value } }
@@ -23,19 +23,6 @@ export function packData(d) {
   return out;
 }
 
-export function estimate(d) {
-  const e = { total: 0, foul: 0 };
-  for (const s of config.sections) e[s.id] = 0;
-  for (const f of fields) {
-    const v = d[f.id];
-    if (!v) continue;
-    const n = f.type === 'toggle' ? 1 : +v;
-    if (f.pts) { e[f.section] += n * f.pts; e.total += n * f.pts; }
-    if (f.foul) e.foul += n * f.foul;
-  }
-  return e;
-}
-
 // Group records by team and compute config.metrics for each.
 export function summarize(records) {
   const byTeam = new Map();
@@ -48,7 +35,7 @@ export function summarize(records) {
     rs.sort((a, b) => matchOrder(a.m) - matchOrder(b.m));
     const m = {};
     for (const met of config.metrics) {
-      const vals = rs.map(r => met.fn(r.d || {}, estimate(r.d || {}))).filter(v => v !== null && v !== undefined);
+      const vals = rs.map(r => met.fn(r.d || {})).filter(v => v !== null && v !== undefined);
       if (!vals.length) { m[met.id] = null; continue; }
       const nums = vals.map(Number);
       if (met.agg === 'sum') m[met.id] = nums.reduce((a, b) => a + b, 0);
@@ -81,10 +68,10 @@ export function toCSV(records) {
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   };
   const rows = records.slice().sort((a, b) => matchOrder(a.m) - matchOrder(b.m)).map(r => {
-    const d = r.d || {}, e = estimate(d);
+    const d = r.d || {};
     return [r.ev, r.m, r.s, r.t, r.sc, new Date(r.u).toISOString(),
       ...fields.map(f => f.type === 'choice' ? (f.options[d[f.id] - 1] ?? '') : (d[f.id] ?? 0)),
-      ...config.metrics.map(m => { const v = m.fn(d, e); return typeof v === 'boolean' ? +v : v; })].map(esc).join(',');
+      ...config.metrics.map(m => { const v = m.fn(d); return typeof v === 'boolean' ? +v : v; })].map(esc).join(',');
   });
   return [cols.join(','), ...rows].join('\n');
 }

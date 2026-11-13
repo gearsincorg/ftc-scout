@@ -120,7 +120,6 @@ textarea { width: 100%; resize: vertical; }
 .field .seg.fill { flex: 1.4; }
 .save-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; display: flex; gap: 12px; align-items: center;
   padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--card); border-top: 1px solid var(--line); }
-.save-bar .est { font-weight: 700; white-space: nowrap; }
 @media (max-width: 520px) {
   .scout-head .big-title { font-size: 1.05rem; }
   .field:not(.counter):not(.col) { flex-direction: column; align-items: stretch; }
@@ -158,6 +157,25 @@ th, td { padding: 8px; border-bottom: 1px solid var(--line); text-align: center;
 .rank tbody tr { cursor: pointer; }
 .rank td:nth-child(2) { text-align: left; }
 .rank.small { font-size: .85rem; }
+/* Summary tables grouped like the form: tinted group headers, a divider before each group,
+   and the Team / Match column stays put while the rest scrolls sideways. */
+.rank.grouped th, .rank.grouped td { padding: 6px 5px; }
+.rank.grouped .grp th { font-size: .7rem; letter-spacing: .04em; padding: 3px 5px; border-bottom: 0; }
+.rank .g-auto { background: var(--auto-bg); color: var(--auto-line); }
+.rank .g-teleop { background: var(--tele-bg); color: var(--tele-line); }
+.rank .g-end { background: var(--end-bg); color: var(--end-line); }
+.rank th.on { text-decoration: underline; }
+.rank .gs { border-left: 2px solid var(--line); }
+.rank .stick { position: sticky; left: 0; z-index: 1; background: var(--card); text-align: left; }
+.stat-group { border-radius: 10px; padding: 6px 8px 0; margin-bottom: 8px; border: 1px solid var(--line); }
+.stat-group.g-auto { background: var(--auto-bg); border-color: var(--auto-line); }
+.stat-group.g-teleop { background: var(--tele-bg); border-color: var(--tele-line); }
+.stat-group.g-end { background: var(--end-bg); border-color: var(--end-line); }
+.stat-title { font-size: .75rem; font-weight: 700; letter-spacing: .04em; margin-bottom: 4px; }
+.stat-group.g-auto .stat-title { color: var(--auto-line); }
+.stat-group.g-teleop .stat-title { color: var(--tele-line); }
+.stat-group.g-end .stat-title { color: var(--end-line); }
+.stat-group .stat { background: var(--card); }
 .tname { font-size: .75rem; color: var(--muted); max-width: 12em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .kv th { text-align: left; font-weight: 400; color: var(--muted); }
 .kv td { text-align: right; font-weight: 700; }
@@ -169,6 +187,7 @@ th, td { padding: 8px; border-bottom: 1px solid var(--line); text-align: center;
 .modal { position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; justify-content: center; }
 .sheet { background: var(--card); width: 100%; max-width: 720px; max-height: 94vh; display: flex; flex-direction: column;
   border-radius: 16px 16px 0 0; padding-bottom: env(safe-area-inset-bottom); }
+.sheet.wide { max-width: 1280px; }
 @media (min-width: 720px) { .modal { align-items: center; } .sheet { border-radius: 16px; } }
 .sheet-head { display: flex; align-items: center; padding: 10px 10px 0 16px; }
 .sheet-head h2 { flex: 1; margin: 0; }
