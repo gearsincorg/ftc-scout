@@ -46,6 +46,14 @@ h3 { font-size: 1.05rem; margin: 1.2em 0 .5em; }
 .tint-end h2 { color: var(--end-line); }
 .tint-perf { background: var(--perf-bg); border-color: var(--perf-line); }
 .tint-perf h2 { color: var(--perf-line); }
+/* Unselected buttons in a coloured region: card fill and a border in the region's colour,
+   so they stand out from the tint. Selected (.on) and + buttons keep their own colours. */
+.tint-auto { --region-line: var(--auto-line); }
+.tint-teleop { --region-line: var(--tele-line); }
+.tint-end { --region-line: var(--end-line); }
+.tint-perf { --region-line: var(--perf-line); }
+.tint .btn:not(.on):not(.plus):not(.primary) { background: var(--card); box-shadow: inset 0 0 0 1.5px var(--region-line); }
+.tint textarea, .tint input { border-color: var(--region-line); }
 .scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 /* buttons */

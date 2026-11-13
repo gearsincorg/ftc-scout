@@ -1,6 +1,6 @@
 // Offline cache for the app shell. Bump VERSION whenever any file below changes,
 // so installed devices pick up the update (they get it on the next online launch).
-const VERSION = 'g-scout-v28';
+const VERSION = 'g-scout-v29';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/ui.js', 'js/db.js', 'js/qr.js', 'js/schedule.js', 'js/records.js',
