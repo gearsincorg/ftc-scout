@@ -22,11 +22,11 @@ export default {
     {
       id: 'auto', title: 'AUTO', sub: '0:30, no drivers',
       fields: [
-        { id: 'al', type: 'toggle', label: 'LEAVE', hint: 'Moved off the perimeter wall', pts: 3 },
-        { id: 'ac', type: 'counter', label: 'Launched into CELL', hint: 'POLLEN / NECTAR that went in' },
+        { id: 'al', type: 'toggle', label: 'LEAVE', pts: 3 },
+        { id: 'ac', type: 'counter', label: 'Launched into CELL' },
         { id: 'am', type: 'counter', label: 'Missed launches' },
-        { id: 'at', type: 'counter', label: 'HIVE TIPS', hint: "This robot's launch tipped the HIVE", pts: 20 },
-        { id: 'ap', type: 'toggle', label: 'AUTO PARK', hint: 'In LOADING ZONE at end of AUTO', pts: 5 },
+        { id: 'at', type: 'counter', label: 'HIVE TIPS', pts: 20 },
+        { id: 'ap', type: 'toggle', label: 'AUTO PARK', pts: 5 },
       ],
     },
     {
@@ -34,16 +34,16 @@ export default {
       fields: [
         { id: 'tc', type: 'counter', label: 'Launched into CELL' },
         { id: 'tm', type: 'counter', label: 'Missed launches' },
-        { id: 'tt', type: 'counter', label: 'HIVE TIPS', hint: "This robot's launch tipped the HIVE", pts: 20 },
-        { id: 'tg', type: 'counter', label: 'Put in GARDEN', hint: 'POLLEN / NECTAR left in own GARDEN', pts: 1 },
+        { id: 'tt', type: 'counter', label: 'HIVE TIPS', pts: 20 },
+        { id: 'tg', type: 'counter', label: 'Put in GARDEN', pts: 1 },
       ],
     },
     {
       id: 'end', title: 'ENDGAME', sub: 'last 1:00',
       fields: [
-        { id: 'ef', type: 'counter', label: 'Placed in FLOWER', hint: 'Counts 2 each if alliance owns it (estimate)', pts: 2 },
-        { id: 'en', type: 'counter', label: 'Topped a FLOWER with NECTAR', hint: 'Claimed ownership' },
-        { id: 'ep', type: 'toggle', label: 'TELEOP PARK', hint: 'In LOADING ZONE at end of match', pts: 5 },
+        { id: 'ef', type: 'counter', label: 'Placed in FLOWER', pts: 2 }, // 2 each only if the alliance owns it (estimate)
+        { id: 'en', type: 'counter', label: 'Topped a FLOWER with NECTAR' },
+        { id: 'ep', type: 'toggle', label: 'TELEOP PARK', pts: 5 },
       ],
     },
     {
@@ -54,8 +54,8 @@ export default {
         { id: 'ns', type: 'toggle', label: 'No show' },
         { id: 'bd', type: 'toggle', label: 'Broke down / stopped' },
         { id: 'tp', type: 'toggle', label: 'Tipped over' },
-        { id: 'fn', type: 'counter', label: 'MINOR FOULS', hint: '5 pts to opponent', foul: 5 },
-        { id: 'fj', type: 'counter', label: 'MAJOR FOULS', hint: '20 pts to opponent', foul: 20 },
+        { id: 'fn', type: 'counter', label: 'MINOR FOULS', foul: 5 },
+        { id: 'fj', type: 'counter', label: 'MAJOR FOULS', foul: 20 },
         { id: 'nt', type: 'text', label: 'Notes', max: 200 },
       ],
     },
