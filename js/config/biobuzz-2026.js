@@ -56,9 +56,7 @@ export default {
         { id: 'nc', type: 'choice', label: 'Nectar Collecting', options: ['Slow', 'Avg.', 'Fast'] },
         { id: 'df', type: 'choice', label: 'Defense played', options: ['Light', 'Heavy'] }, // 1 = Light (was Some), 2 = Heavy (old records' 0 = None reads as not set)
         { id: 'dr', type: 'rating', label: 'Driver skill', max: 5 },
-        { id: 'ns', type: 'toggle', label: 'MIA' },
-        { id: 'bd', type: 'toggle', label: 'Broke', pair: true },
-        { id: 'tp', type: 'toggle', label: 'Tipped', pair: true },
+        { id: 'st', type: 'choice', label: 'Robot', options: ['MIA', 'Broke', 'Tip'] },
         { id: 'fn', type: 'counter', label: 'MINOR FOULS', foul: 5 },
         { id: 'fj', type: 'counter', label: 'MAJOR FOULS', foul: 20 },
         { id: 'nt', type: 'text', label: 'Notes', max: 200 },
@@ -78,7 +76,7 @@ export default {
     { id: 'lv', label: 'Leave', agg: 'pct', fn: d => !!d.al },
     { id: 'pk', label: 'Park', agg: 'pct', fn: d => !!d.ep },
     { id: 'drv', label: 'Driver', agg: 'avg', fn: d => d.dr || null },
-    { id: 'brk', label: 'Broke', agg: 'sum', fn: d => (d.bd || d.ns ? 1 : 0) },
+    { id: 'brk', label: 'Broke', agg: 'sum', fn: d => (d.st === 1 || d.st === 2 ? 1 : 0) },   // MIA or Broke
     { id: 'foul', label: 'Foul pts', agg: 'avg', fn: (d, e) => e.foul },
   ],
   defaultSort: 'pts',
